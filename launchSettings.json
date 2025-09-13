@@ -1,0 +1,15 @@
+{
+  "profiles": {
+    "Docker Compose": {
+      "commandName": "DockerCompose",
+      "commandLineArgs": "/data/html/list/list-29.html",
+      "commandVersion": "1.0",
+      "composeLaunchAction": "None",
+      "composeLaunchServiceName": "filmaffinitylistparser",
+      "serviceActions": {
+        "filmaffinitylistparser": "StartDebugging",
+        "radarr": "StartWithoutDebugging"
+      }
+    }
+  }
+}

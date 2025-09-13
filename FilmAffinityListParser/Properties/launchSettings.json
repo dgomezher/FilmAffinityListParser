@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "FilmAffinityListParser": {
+      "commandName": "Project"
+    },
+    "Container (Dockerfile)": {
+      "commandName": "Docker"
+    }
+  }
+}

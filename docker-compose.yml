@@ -1,0 +1,65 @@
+services:
+  filmaffinitylistparser:
+    env_file:
+      - .env
+    image: ${DOCKER_REGISTRY-}filmaffinitylistparser
+    build:
+      context: .
+      dockerfile: FilmAffinityListParser/Dockerfile
+    volumes:
+      - ./data/radarr/config:/data/radarr/config
+      - ${OUTPUT_PATH}:/output
+      - ${INPUT_PATH}:/input
+    stdin_open: true  # This enables interactive mode (-i flag) for user choice when multiple matches found
+    tty: true 
+    networks:
+      - app-network
+  radarr:
+    image: lscr.io/linuxserver/radarr:latest
+    container_name: radarr
+    environment:
+      - PUID=1000 
+      - PGID=1000 
+      - TZ=Europe/Madrid 
+    volumes:
+      - ./data/radarr/config:/config
+      - ./data/media/movies:/movies
+      - ./data/downloads:/downloads
+    ports:
+      - 7878:7878
+    networks:
+      - app-network
+    restart: unless-stopped
+  libretranslate:
+    image: libretranslate/libretranslate:latest
+    container_name: libretranslate
+    environment:
+      - LT_HOST=0.0.0.0
+      - LT_PORT=5000
+      - LT_UPDATE_MODELS=true
+      - LT_LOAD_ONLY=en,es
+    ports:
+      - "5000:5000"
+    networks:
+      - app-network
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          memory: 2G
+        reservations:
+          memory: 1G
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:5000/ || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+      start_period: 120s  # Gap of 2 minutes to download models
+    volumes:
+    # Avoid re-downloading models on startup
+      - libretranslate_models:/home/libretranslate/.local:rw
+volumes:
+  libretranslate_models:  
+networks:
+  app-network:
+    driver: bridge
